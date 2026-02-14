@@ -39,14 +39,14 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const students = await blink.db.sql<any>('SELECT COUNT(*) as count FROM auth_users WHERE metadata->>"role" = "student"');
-      const teachers = await blink.db.sql<any>('SELECT COUNT(*) as count FROM auth_users WHERE metadata->>"role" = "teacher"');
-      const classes = await blink.db.classes.count();
+      const studentsCount = await blink.db.userProfiles.count({ where: { role: 'student' } });
+      const teachersCount = await blink.db.userProfiles.count({ where: { role: 'teacher' } });
+      const classesCount = await blink.db.classes.count();
       
       setStats({
-        students: students.rows[0].count,
-        teachers: teachers.rows[0].count,
-        classes
+        students: studentsCount,
+        teachers: teachersCount,
+        classes: classesCount
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -220,8 +220,8 @@ const StaffManager = ({ role }: { role: 'teacher' | 'student' }) => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await blink.db.sql<any>(`SELECT * FROM auth_users WHERE metadata->>"role" = "${role}"`);
-      setUsers(res.rows);
+      const data = await blink.db.userProfiles.list({ where: { role } });
+      setUsers(data as any);
     } catch (error) {
       console.error(error);
     } finally {
@@ -229,7 +229,7 @@ const StaffManager = ({ role }: { role: 'teacher' | 'student' }) => {
     }
   };
 
-  const filtered = users.filter(u => u.display_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = users.filter(u => u.name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="space-y-6">
@@ -263,7 +263,7 @@ const StaffManager = ({ role }: { role: 'teacher' | 'student' }) => {
             ) : (
               filtered.map((u) => (
                 <tr key={u.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-6 py-4 font-bold text-primary">{u.display_name}</td>
+                  <td className="px-6 py-4 font-bold text-primary">{u.name}</td>
                   <td className="px-6 py-4 text-muted-foreground">{u.email}</td>
                   <td className="px-6 py-4 font-mono text-xs">{u.id.slice(-8)}</td>
                   <td className="px-6 py-4 text-right space-x-2">

@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import LandingPage from './pages/LandingPage';
+import PortalPage from './pages/PortalPage';
 import LoginPage from './pages/LoginPage';
 import DashboardLayout from './components/layout/DashboardLayout';
 import AdminDashboard from './pages/AdminDashboard';
@@ -35,6 +36,7 @@ const App = () => {
       <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Spinner /></div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/portal" element={<PortalPage />} />
           <Route path="/login" element={<LoginPage />} />
           
           <Route path="/admin/*" element={

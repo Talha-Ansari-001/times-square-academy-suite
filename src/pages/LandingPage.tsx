@@ -13,8 +13,8 @@ const LandingPage = () => {
           <span className="text-white font-serif text-xl font-bold tracking-tight uppercase">Times Square Academy</span>
         </div>
         <div className="flex items-center gap-6 text-white/80 text-sm font-medium">
-          <Link to="/login" className="hover:text-secondary transition-colors">Portals</Link>
-          <Link to="/login" className="btn-secondary py-2 px-6">Login</Link>
+          <Link to="/portal" className="hover:text-secondary transition-colors">Portals</Link>
+          <Link to="/portal" className="btn-secondary py-2 px-6">Login</Link>
         </div>
       </nav>
 
@@ -43,7 +43,7 @@ const LandingPage = () => {
               Empowering the next generation of leaders through rigorous academic standards and a community built on integrity.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/login" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
+              <Link to="/portal" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
                 Access Portals
               </Link>
               <button className="text-white flex items-center gap-2 hover:gap-4 transition-all duration-300">
@@ -66,19 +66,19 @@ const LandingPage = () => {
             icon={<ShieldCheck className="w-12 h-12 text-secondary" />}
             title="Admin Portal"
             description="Complete institutional oversight, management, and strategic controls."
-            link="/login?role=admin"
+            link="/portal"
           />
           <PortalCard 
             icon={<Users className="w-12 h-12 text-secondary" />}
             title="Teacher Portal"
             description="Manage your classroom, track attendance, and nurture student growth."
-            link="/login?role=teacher"
+            link="/portal"
           />
           <PortalCard 
             icon={<UserCircle className="w-12 h-12 text-secondary" />}
             title="Student Portal"
             description="Access your academic records, track progress, and view announcements."
-            link="/login?role=student"
+            link="/portal"
           />
         </div>
       </section>

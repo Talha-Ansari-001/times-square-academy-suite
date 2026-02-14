@@ -11,7 +11,8 @@ import Spinner from '../components/ui/spinner';
 const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
-  const [role, setRole] = useState(searchParams.get('role') || 'student');
+  const requestedRole = searchParams.get('role') || 'student';
+  const [role, setRole] = useState(requestedRole);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -25,20 +26,31 @@ const LoginPage = () => {
     try {
       if (isLogin) {
         await blink.auth.signInWithEmail(email, password);
-        toast.success('Successfully logged in');
+        const user = await blink.auth.me();
+        const userRole = user?.metadata?.role || 'student';
+        toast.success(`Welcome back, ${userRole}`);
+        navigate(`/${userRole}`);
       } else {
-        await blink.auth.signUp({
+        const { user: newUser } = await blink.auth.signUp({
           email,
           password,
           displayName: name,
           metadata: { role }
         });
+
+        if (newUser) {
+          await blink.db.userProfiles.create({
+            id: newUser.id,
+            name: name,
+            email: email,
+            role: role,
+            userId: newUser.id
+          });
+        }
+        
         toast.success('Account created successfully');
+        navigate(`/${role}`);
       }
-      
-      // Redirect based on role
-      const targetRole = isLogin ? (await blink.auth.me())?.metadata?.role : role;
-      navigate(`/${targetRole}`);
     } catch (error: any) {
       toast.error(error.message || 'Authentication failed');
     } finally {
@@ -47,44 +59,44 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#f8f9fc] flex items-center justify-center p-6 relative">
       <div className="absolute top-8 left-8">
-        <button onClick={() => navigate('/')} className="flex items-center gap-2 text-primary/60 hover:text-primary transition-colors font-medium">
-          <ArrowLeft size={20} /> Back to home
+        <button onClick={() => navigate('/portal')} className="flex items-center gap-2 text-primary/60 hover:text-primary transition-colors font-medium">
+          <ArrowLeft size={20} /> Back to Portal
         </button>
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <div className="bg-primary p-4 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-xl">
-            <GraduationCap className="text-secondary w-10 h-10" />
+          <div className="bg-primary p-4 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-xl relative overflow-hidden group">
+            <GraduationCap className="text-secondary w-10 h-10 relative z-10" />
+            <div className="absolute inset-0 bg-secondary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           </div>
           <h1 className="text-3xl font-serif text-primary mb-2">
-            {isLogin ? 'Academy Login' : 'Student Enrollment'}
+            {isLogin ? `${role.charAt(0).toUpperCase() + role.slice(1)} Login` : 'Academy Enrollment'}
           </h1>
-          <p className="text-muted-foreground">Times Square Academy Suite</p>
+          <p className="text-muted-foreground text-sm tracking-widest uppercase font-bold opacity-50">Times Square Academy Suite</p>
         </div>
 
-        <div className="card-premium p-8 lg:p-10 shadow-2xl">
-          {!isLogin && (
-            <div className="flex bg-muted p-1 rounded-lg mb-8">
-              {['student', 'teacher', 'admin'].map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRole(r)}
-                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${
-                    role === r ? 'bg-primary text-white shadow-md' : 'text-primary/40'
-                  }`}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="card-premium p-8 lg:p-10 shadow-2xl bg-white border-t-4 border-t-secondary">
+          <div className="flex bg-muted p-1 rounded-lg mb-8">
+            {['student', 'teacher', 'admin'].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRole(r)}
+                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all ${
+                  role === r ? 'bg-primary text-white shadow-md' : 'text-primary/40 hover:text-primary/60'
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (

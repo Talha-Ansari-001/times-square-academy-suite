@@ -117,14 +117,11 @@ const AttendanceTracker = ({ classes }: { classes: Class[] }) => {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      // In a real app, students would be linked to classId
-      // For this demo, we'll fetch all students
-      const res = await blink.db.sql<any>(`SELECT * FROM auth_users WHERE metadata->>"role" = "student"`);
-      setStudents(res.rows);
+      const data = await blink.db.userProfiles.list({ where: { role: 'student' } });
+      setStudents(data as any);
       
-      // Initialize attendance
       const initial: any = {};
-      res.rows.forEach((s: any) => initial[u.id] = 'present');
+      (data as any).forEach((s: any) => initial[s.id] = 'present');
       setAttendance(initial);
     } catch (error) {
       console.error(error);
@@ -178,7 +175,7 @@ const AttendanceTracker = ({ classes }: { classes: Class[] }) => {
               <tr><td colSpan={3} className="p-8 text-center"><Spinner className="w-6 h-6 mx-auto" /></td></tr>
             ) : students.map((s) => (
               <tr key={s.id} className="hover:bg-muted/30 transition-colors">
-                <td className="px-6 py-4 font-bold text-primary">{s.display_name}</td>
+                <td className="px-6 py-4 font-bold text-primary">{s.name}</td>
                 <td className="px-6 py-4 font-mono text-xs">{s.id.slice(-8)}</td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center gap-4">
